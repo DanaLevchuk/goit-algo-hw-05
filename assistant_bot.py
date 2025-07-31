@@ -1,5 +1,3 @@
-contacts = {}
-
 def input_error(func):
     def inner(*args, **kwargs):
         try:
@@ -13,13 +11,13 @@ def input_error(func):
     return inner
 
 @input_error
-def add_contact(args):
+def add_contact(args, contacts):
     name, phone = args
     contacts[name] = phone
     return "Contact added."
 
 @input_error
-def change_contact(args):
+def change_contact(args, contacts):
     name, phone = args
     if name in contacts:
         contacts[name] = phone
@@ -27,38 +25,42 @@ def change_contact(args):
     raise KeyError
 
 @input_error
-def get_phone(args):
+def get_phone(args, contacts):
     name = args[0]
     return contacts[name]
 
-def show_all(_=None):
-    result = []
-    for name, phone in contacts.items():
-        result.append(f"{name}: {phone}")
-    return "\n".join(result) if result else "No contacts found."
-
-COMMANDS = {
-    "add": add_contact,
-    "change": change_contact,
-    "phone": get_phone,
-    "all": show_all,
-}
+def show_all(_, contacts):
+    if not contacts:
+        return "No contacts found."
+    return "\n".join([f"{name}: {phone}" for name, phone in contacts.items()])
 
 def parser(text: str):
     parts = text.strip().split()
     cmd = parts[0].lower()
     args = parts[1:]
-    return COMMANDS.get(cmd), args
+    return cmd, args
 
 def main():
+    contacts = {}
+
+    COMMANDS = {
+        "add": add_contact,
+        "change": change_contact,
+        "phone": get_phone,
+        "all": show_all,
+    }
+
     while True:
         user_input = input("Enter a command: ")
         if user_input.lower() in ["exit", "close", "good bye"]:
             print("Good bye!")
             break
-        command, args = parser(user_input)
-        if command:
-            print(command(args))
+
+        cmd, args = parser(user_input)
+        handler = COMMANDS.get(cmd)
+
+        if handler:
+            print(handler(args, contacts))
         else:
             print("Invalid command.")
 
