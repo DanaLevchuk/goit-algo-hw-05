@@ -7,7 +7,7 @@ def input_error(func):
         except ValueError:
             return "Give me name and phone please."
         except IndexError:
-            return "Enter user name"
+            return "Enter user name."
     return inner
 
 @input_error
@@ -36,6 +36,8 @@ def show_all(_, contacts):
 
 def parser(text: str):
     parts = text.strip().split()
+    if not parts:
+        return "", []
     cmd = parts[0].lower()
     args = parts[1:]
     return cmd, args
@@ -51,7 +53,11 @@ def main():
     }
 
     while True:
-        user_input = input("Enter a command: ")
+        user_input = input("Enter a command: ").strip()
+        if not user_input:
+            print("Please enter a command.")
+            continue
+
         if user_input.lower() in ["exit", "close", "good bye"]:
             print("Good bye!")
             break
